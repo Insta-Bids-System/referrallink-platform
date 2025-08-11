@@ -58,7 +58,11 @@
       "Bash(eas:*)",
       "Bash(start C:/Users/USER/Desktop/ReferralLink/build_dashboard.html)",
       "Bash(git merge:*)",
-      "Bash(git cherry-pick:*)"
+      "Bash(git cherry-pick:*)",
+      "Bash(git pull:*)",
+      "Bash(railway whoami:*)",
+      "Bash(start C:/Users/USER/Desktop/ReferralLink/DEPLOY_RAILWAY.bat)",
+      "Bash(railway status:*)"
     ],
     "deny": []
   }
