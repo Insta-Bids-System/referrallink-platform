@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "ReferralLink",
+    "slug": "referrallink",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.referrallink.app"
+    },
+    "android": {
+      "package": "com.referrallink.app"
+    },
+    "web": {},
+    "extra": {
+      "apiUrl": "http://localhost:5000/api"
+    }
+  }
+}

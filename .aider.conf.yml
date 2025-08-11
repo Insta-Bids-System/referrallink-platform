@@ -1,0 +1,47 @@
+# Aider AI Coding Assistant Configuration
+# Based on IndyDevDan's best practices
+
+# Model settings
+model: gpt-4o
+edit-format: diff
+auto-commits: false
+auto-lint: true
+
+# Voice settings for hands-free coding
+voice-language: en
+
+# Git settings
+git: true
+gitignore: true
+
+# Map settings for better context understanding
+map-tokens: 1024
+map-refresh: auto
+
+# Testing
+test-cmd: npm test
+
+# Linting
+lint-cmd: npm run lint
+
+# Code quality
+check-update: true
+show-diffs: true
+
+# Context management
+max-chat-history-tokens: 8000
+
+# File watching
+watch-files: true
+
+# Repository map
+repo-map: true
+
+# Enable streaming for real-time feedback
+stream: true
+
+# Dark mode for terminal
+dark-mode: true
+
+# Pretty output
+pretty: true

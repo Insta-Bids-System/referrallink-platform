@@ -1,0 +1,144 @@
+{
+  "timestamp": "2025-08-07 17:12:09",
+  "total_tests": 27,
+  "passed": 27,
+  "failed": 0,
+  "success_rate": 100.0,
+  "results": [
+    {
+      "name": "Backend directory exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "Package.json exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "TypeScript compilation",
+      "passed": true,
+      "message": "No compilation errors"
+    },
+    {
+      "name": "  Health Check (GET health)",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "  API Test (GET test)",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "  Login (POST login)",
+      "passed": true,
+      "message": "Status: 200"
+    },
+    {
+      "name": "  Register (POST register)",
+      "passed": true,
+      "message": "Status: 201"
+    },
+    {
+      "name": "Mobile directory exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "Package.json exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  App.tsx exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Dashboard Screen exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Login Screen exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Auth Store exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Navigation exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "TypeScript config exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "Agents directory exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Base Agent exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Code Agent exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Spec Agent exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Parallel Orchestrator exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Config Orchestrator exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Agent Config exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Code Agent",
+      "passed": true,
+      "message": "Executed successfully"
+    },
+    {
+      "name": "  Spec Agent",
+      "passed": true,
+      "message": "Executed successfully"
+    },
+    {
+      "name": "Observability directory exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Agent Monitor exists",
+      "passed": true,
+      "message": ""
+    },
+    {
+      "name": "  Dashboard exists",
+      "passed": true,
+      "message": ""
+    }
+  ]
+}

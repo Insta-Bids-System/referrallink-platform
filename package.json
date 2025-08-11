@@ -1,0 +1,23 @@
+{
+  "name": "referrallink",
+  "version": "1.0.0",
+  "description": "AI-powered development project with agent workflows",
+  "main": "index.js",
+  "scripts": {
+    "aider": "aider",
+    "agent": "python agents/run_agent.py",
+    "dev": "node src/index.js",
+    "test": "jest",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "keywords": ["ai", "agents", "automation"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3"
+  },
+  "dependencies": {}
+}

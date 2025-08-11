@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Observability Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #1a1a1a;
+            border-right: 1px solid #333;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .metrics {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .metric {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .events-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .event {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .event:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-type {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .event-type.tool_use {
+            background: #2563eb;
+        }
+        
+        .event-type.notification {
+            background: #10b981;
+        }
+        
+        .event-type.prompt_submit {
+            background: #f59e0b;
+        }
+        
+        .event-type.completion {
+            background: #8b5cf6;
+        }
+        
+        .event-time {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .event-details {
+            font-size: 0.9rem;
+            color: #ccc;
+            font-family: 'Courier New', monospace;
+            background: #0f0f0f;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+        
+        .agent-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #2a2a2a;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .agent-item:hover {
+            background: #333;
+            border-left-color: #667eea;
+        }
+        
+        .agent-item.active {
+            background: #333;
+            border-left-color: #667eea;
+        }
+        
+        .agent-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .agent-status {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-indicator.active {
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.idle {
+            background: #888;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+        
+        .connection-status {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .connection-status.connected {
+            border-color: #10b981;
+        }
+        
+        .connection-status.disconnected {
+            border-color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🤖 Multi-Agent Observability Dashboard</h1>
+        <div class="subtitle">Real-time monitoring for Claude Code agents (IndyDevDan style)</div>
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <h3 style="margin-bottom: 1rem; color: #667eea;">Active Agents</h3>
+            <div id="agentsList"></div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-label">Total Events</div>
+                    <div class="metric-value" id="totalEvents">0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Agents</div>
+                    <div class="metric-value" id="activeAgents">0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-value" id="successRate">0%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Avg Duration</div>
+                    <div class="metric-value" id="avgDuration">0ms</div>
+                </div>
+            </div>
+            
+            <div class="events-container" id="eventsContainer">
+                <!-- Events will be added here dynamically -->
+            </div>
+        </main>
+    </div>
+    
+    <div class="connection-status disconnected" id="connectionStatus">
+        <span class="status-indicator idle"></span>
+        <span id="connectionText">Disconnected</span>
+    </div>
+    
+    <script>
+        class ObservabilityDashboard {
+            constructor() {
+                this.ws = null;
+                this.events = [];
+                this.agents = new Map();
+                this.metrics = {
+                    totalEvents: 0,
+                    activeAgents: 0,
+                    successCount: 0,
+                    failureCount: 0,
+                    totalDuration: 0,
+                    eventCount: 0
+                };
+                
+                this.connect();
+                this.setupEventListeners();
+            }
+            
+            connect() {
+                const wsUrl = 'ws://localhost:8765';
+                this.ws = new WebSocket(wsUrl);
+                
+                this.ws.onopen = () => {
+                    console.log('Connected to observability server');
+                    this.updateConnectionStatus(true);
+                };
+                
+                this.ws.onmessage = (event) => {
+                    this.handleMessage(JSON.parse(event.data));
+                };
+                
+                this.ws.onclose = () => {
+                    console.log('Disconnected from server');
+                    this.updateConnectionStatus(false);
+                    // Reconnect after 3 seconds
+                    setTimeout(() => this.connect(), 3000);
+                };
+                
+                this.ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+            }
+            
+            handleMessage(data) {
+                if (data.type === 'initial') {
+                    // Load initial events
+                    data.events.forEach(event => this.addEvent(event));
+                } else {
+                    // Add new event
+                    this.addEvent(data);
+                }
+            }
+            
+            addEvent(event) {
+                this.events.unshift(event);
+                
+                // Update agents list
+                if (!this.agents.has(event.agent_id)) {
+                    this.agents.set(event.agent_id, {
+                        id: event.agent_id,
+                        lastActive: event.timestamp,
+                        eventCount: 0,
+                        status: 'active'
+                    });
+                }
+                
+                const agent = this.agents.get(event.agent_id);
+                agent.eventCount++;
+                agent.lastActive = event.timestamp;
+                
+                // Update metrics
+                this.updateMetrics(event);
+                
+                // Update UI
+                this.renderEvent(event);
+                this.renderAgents();
+                this.renderMetrics();
+                
+                // Keep only last 100 events
+                if (this.events.length > 100) {
+                    this.events = this.events.slice(0, 100);
+                    this.rerenderEvents();
+                }
+            }
+            
+            updateMetrics(event) {
+                this.metrics.totalEvents++;
+                
+                if (event.status === 'completed') {
+                    this.metrics.successCount++;
+                } else if (event.status === 'failed') {
+                    this.metrics.failureCount++;
+                }
+                
+                if (event.duration_ms) {
+                    this.metrics.totalDuration += event.duration_ms;
+                    this.metrics.eventCount++;
+                }
+                
+                this.metrics.activeAgents = this.agents.size;
+            }
+            
+            renderEvent(event) {
+                const container = document.getElementById('eventsContainer');
+                const eventEl = document.createElement('div');
+                eventEl.className = 'event';
+                
+                const eventData = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                
+                eventEl.innerHTML = `
+                    <div class="event-header">
+                        <div>
+                            <span class="event-type ${event.event_type}">${event.event_type}</span>
+                            <span style="margin-left: 1rem; color: #888;">Agent: ${event.agent_id}</span>
+                        </div>
+                        <div class="event-time">${new Date(event.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                    <div class="event-details">${JSON.stringify(eventData, null, 2)}</div>
+                `;
+                
+                container.insertBefore(eventEl, container.firstChild);
+            }
+            
+            rerenderEvents() {
+                const container = document.getElementById('eventsContainer');
+                container.innerHTML = '';
+                this.events.forEach(event => this.renderEvent(event));
+            }
+            
+            renderAgents() {
+                const container = document.getElementById('agentsList');
+                container.innerHTML = '';
+                
+                this.agents.forEach((agent, id) => {
+                    const agentEl = document.createElement('div');
+                    agentEl.className = 'agent-item';
+                    
+                    const isActive = (Date.now() - new Date(agent.lastActive).getTime()) < 30000;
+                    
+                    agentEl.innerHTML = `
+                        <div class="agent-name">
+                            <span class="status-indicator ${isActive ? 'active' : 'idle'}"></span>
+                            ${id}
+                        </div>
+                        <div class="agent-status">
+                            ${agent.eventCount} events • Last: ${new Date(agent.lastActive).toLocaleTimeString()}
+                        </div>
+                    `;
+                    
+                    container.appendChild(agentEl);
+                });
+            }
+            
+            renderMetrics() {
+                document.getElementById('totalEvents').textContent = this.metrics.totalEvents;
+                document.getElementById('activeAgents').textContent = this.metrics.activeAgents;
+                
+                const successRate = this.metrics.totalEvents > 0 
+                    ? ((this.metrics.successCount / this.metrics.totalEvents) * 100).toFixed(1)
+                    : 0;
+                document.getElementById('successRate').textContent = `${successRate}%`;
+                
+                const avgDuration = this.metrics.eventCount > 0
+                    ? Math.round(this.metrics.totalDuration / this.metrics.eventCount)
+                    : 0;
+                document.getElementById('avgDuration').textContent = `${avgDuration}ms`;
+            }
+            
+            updateConnectionStatus(connected) {
+                const statusEl = document.getElementById('connectionStatus');
+                const textEl = document.getElementById('connectionText');
+                const indicatorEl = statusEl.querySelector('.status-indicator');
+                
+                if (connected) {
+                    statusEl.className = 'connection-status connected';
+                    indicatorEl.className = 'status-indicator active';
+                    textEl.textContent = 'Connected';
+                } else {
+                    statusEl.className = 'connection-status disconnected';
+                    indicatorEl.className = 'status-indicator idle';
+                    textEl.textContent = 'Disconnected';
+                }
+            }
+            
+            setupEventListeners() {
+                // Add any additional event listeners here
+            }
+        }
+        
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ObservabilityDashboard();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: referrallink-backend
+  namespace: referrallink
+  labels:
+    app: referrallink
+    component: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: referrallink
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: referrallink
+        component: backend
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/yourusername/referrallink/backend:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "5000"
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: referrallink-secrets
+              key: db-host
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: referrallink-secrets
+              key: db-password
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: referrallink-secrets
+              key: jwt-secret
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: referrallink-secrets
+              key: openai-api-key
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: referrallink-secrets
+              key: stripe-secret-key
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: referrallink-backend-service
+  namespace: referrallink
+spec:
+  selector:
+    app: referrallink
+    component: backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: referrallink-web
+  namespace: referrallink
+  labels:
+    app: referrallink
+    component: web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: referrallink
+      component: web
+  template:
+    metadata:
+      labels:
+        app: referrallink
+        component: web
+    spec:
+      containers:
+      - name: web
+        image: ghcr.io/yourusername/referrallink/web:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REACT_APP_API_URL
+          value: "https://api.referrallink.com"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: referrallink-web-service
+  namespace: referrallink
+spec:
+  selector:
+    app: referrallink
+    component: web
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: referrallink-ingress
+  namespace: referrallink
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  tls:
+  - hosts:
+    - referrallink.com
+    - api.referrallink.com
+    - admin.referrallink.com
+    secretName: referrallink-tls
+  rules:
+  - host: api.referrallink.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: referrallink-backend-service
+            port:
+              number: 5000
+  - host: referrallink.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: referrallink-web-service
+            port:
+              number: 3000
+  - host: admin.referrallink.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: referrallink-admin-service
+            port:
+              number: 3000
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: referrallink-backend-hpa
+  namespace: referrallink
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: referrallink-backend
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
