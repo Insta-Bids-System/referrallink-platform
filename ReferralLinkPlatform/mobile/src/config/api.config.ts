@@ -12,7 +12,7 @@ const API_CONFIG = {
   
   // API endpoints
   getBaseUrl: () => {
-    // Always use Railway backend for now since local isn't running
+    // Always use Railway backend
     return 'https://referrallink-platform-production.up.railway.app';
   }
 };

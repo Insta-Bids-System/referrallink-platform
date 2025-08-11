@@ -57,7 +57,8 @@
       "Bash(eas whoami:*)",
       "Bash(eas:*)",
       "Bash(start C:/Users/USER/Desktop/ReferralLink/build_dashboard.html)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git cherry-pick:*)"
     ],
     "deny": []
   }
