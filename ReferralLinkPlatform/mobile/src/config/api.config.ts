@@ -12,13 +12,8 @@ const API_CONFIG = {
   
   // API endpoints
   getBaseUrl: () => {
-    // Check if running on device or emulator
-    if (__DEV__) {
-      // For development
-      return `http://192.168.29.252:5000`;
-    }
-    // For production
-    return 'https://api.referrallink.com';
+    // Always use Railway backend for now since local isn't running
+    return 'https://referrallink-platform-production.up.railway.app';
   }
 };
 

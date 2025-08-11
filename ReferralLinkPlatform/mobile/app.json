@@ -1,23 +1,40 @@
 {
   "expo": {
-    "name": "ReferralLink",
-    "slug": "referrallink",
+    "name": "Instabids Referral",
+    "slug": "instabids-referral",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2196F3"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.referrallink.app"
+      "bundleIdentifier": "ai.instabids.referral",
+      "buildNumber": "1"
     },
     "android": {
-      "package": "com.referrallink.app"
+      "package": "ai.instabids.referral",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2196F3"
+      }
     },
-    "web": {},
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "extra": {
-      "apiUrl": "http://localhost:5000/api"
+      "apiUrl": "https://referrallink-platform-production.up.railway.app",
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
     }
   }
 }
