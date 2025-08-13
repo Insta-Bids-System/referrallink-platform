@@ -5,7 +5,7 @@ const router = Router();
 
 // Mock user data for testing
 const mockUser = {
-  id: '1',
+  id: '550e8400-e29b-41d4-a716-446655440000', // Use a valid UUID
   email: 'test@example.com',
   firstName: 'Test',
   lastName: 'User',
@@ -24,9 +24,12 @@ router.post('/register', async (req: Request, res: Response): Promise<Response> 
       });
     }
     
+    // Generate a random UUID for the user
+    const userId = '550e8400-e29b-41d4-a716-' + Math.random().toString(36).substring(2, 14);
+    
     // Create JWT token
     const token = jwt.sign(
-      { userId: '1', email },
+      { userId, email },
       process.env.JWT_SECRET || 'default-secret',
       { expiresIn: '7d' }
     );
@@ -34,7 +37,7 @@ router.post('/register', async (req: Request, res: Response): Promise<Response> 
     return res.status(201).json({
       message: 'User registered successfully',
       user: {
-        id: '1',
+        id: userId,
         email,
         firstName,
         lastName
