@@ -15,7 +15,9 @@ const sequelize = new Sequelize({
     ssl: {
       require: true,
       rejectUnauthorized: false
-    }
+    },
+    // Force IPv4 connection for Railway deployment
+    family: 4
   },
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   pool: {
