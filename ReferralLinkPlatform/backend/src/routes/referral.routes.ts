@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { SupabaseReferralController } from '../controllers/referral.supabase.controller';
-import { authenticateSupabase } from '../middleware/auth.supabase';
+import { authenticateToken } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validation.middleware';
 import { body, param, query } from 'express-validator';
 
@@ -9,8 +9,8 @@ const router = Router();
 // Public route for handling clicks
 router.get('/r/:shortCode', SupabaseReferralController.handleClick);
 
-// Protected routes (require authentication)
-router.use(authenticateSupabase);
+// Protected routes (require authentication) - using JWT auth instead of Supabase auth
+router.use(authenticateToken as any);
 
 // Create a new referral link (simplified - no URL or expiration needed)
 router.post(

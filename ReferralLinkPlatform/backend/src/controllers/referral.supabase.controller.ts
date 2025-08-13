@@ -8,7 +8,10 @@ export class SupabaseReferralController {
    */
   static async createLink(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.userId) {
+      // Handle both JWT auth (req.user) and Supabase auth (req.userId)
+      const userId = req.userId || req.user?.id || req.user?.userId;
+      
+      if (!userId) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
@@ -16,7 +19,7 @@ export class SupabaseReferralController {
       const { customMessage, tags } = req.body;
 
       // Check if user already has an active primary link
-      const existingLink = await SupabaseReferralLinkService.getPrimaryLink(req.userId);
+      const existingLink = await SupabaseReferralLinkService.getPrimaryLink(userId);
       
       if (existingLink && existingLink.is_active) {
         // Return existing link instead of creating a new one
@@ -45,7 +48,7 @@ export class SupabaseReferralController {
       };
 
       const link = await SupabaseReferralLinkService.createReferralLink(
-        req.userId,
+        userId,
         customMessage,
         metadata
       );
@@ -74,12 +77,13 @@ export class SupabaseReferralController {
    */
   static async getUserLinks(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.userId) {
+      const userId = req.userId || req.user?.id || req.user?.userId;
+      if (!userId) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
 
-      const links = await SupabaseReferralLinkService.getUserLinks(req.userId);
+      const links = await SupabaseReferralLinkService.getUserLinks(userId);
 
       res.json({
         links: links.map(link => ({
@@ -107,12 +111,13 @@ export class SupabaseReferralController {
    */
   static async getPrimaryLink(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.userId) {
+      const userId = req.userId || req.user?.id || req.user?.userId;
+      if (!userId) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
 
-      const link = await SupabaseReferralLinkService.getPrimaryLink(req.userId);
+      const link = await SupabaseReferralLinkService.getPrimaryLink(userId);
 
       if (!link) {
         res.status(404).json({ 
@@ -146,12 +151,13 @@ export class SupabaseReferralController {
    */
   static async refreshLink(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.userId) {
+      const userId = req.userId || req.user?.id || req.user?.userId;
+      if (!userId) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
 
-      const link = await SupabaseReferralLinkService.refreshLink(req.userId);
+      const link = await SupabaseReferralLinkService.refreshLink(userId);
 
       res.json({
         message: 'Link refreshed successfully',
@@ -239,7 +245,8 @@ export class SupabaseReferralController {
    */
   static async getLinkStatistics(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.userId) {
+      const userId = req.userId || req.user?.id || req.user?.userId;
+      if (!userId) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
@@ -247,7 +254,7 @@ export class SupabaseReferralController {
       const { linkId } = req.params;
 
       // Verify user owns the link
-      const links = await SupabaseReferralLinkService.getUserLinks(req.userId);
+      const links = await SupabaseReferralLinkService.getUserLinks(userId);
       const link = links.find(l => l.id === linkId);
 
       if (!link) {
@@ -276,14 +283,15 @@ export class SupabaseReferralController {
    */
   static async deleteLink(req: AuthRequest, res: Response): Promise<void> {
     try {
-      if (!req.userId) {
+      const userId = req.userId || req.user?.id || req.user?.userId;
+      if (!userId) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
 
       const { linkId } = req.params;
 
-      await SupabaseReferralLinkService.deleteLink(linkId, req.userId);
+      await SupabaseReferralLinkService.deleteLink(linkId, userId);
 
       res.json({ message: 'Link deleted successfully' });
     } catch (error: any) {
