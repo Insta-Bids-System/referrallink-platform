@@ -73,7 +73,11 @@
       "WebFetch(domain:nixpacks.up.railway.app)",
       "WebFetch(domain:docs.railway.app)",
       "WebFetch(domain:docs.railway.com)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(start https://railway.com/project/be9a5dc8-3f0e-48d0-9741-1f14e892cf81/service/89ca29b9-8e8c-4a5d-a5d9-f056eff59d3f/logs)",
+      "Bash(start https://railway.app/project/be9a5dc8-3f0e-48d0-9741-1f14e892cf81/service/89ca29b9-8e8c-4a5d-a5d9-f056eff59d3f/settings)",
+      "Bash(start C:/Users/USER/Desktop/ReferralLink/RAILWAY_DEPLOYMENT_STATUS.md)",
+      "Bash(railway service:*)"
     ],
     "deny": []
   }

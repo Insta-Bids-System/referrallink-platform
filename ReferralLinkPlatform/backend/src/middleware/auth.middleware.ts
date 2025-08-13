@@ -4,6 +4,10 @@ import { User } from '../models';
 
 export interface AuthRequest extends Request {
   user?: any;
+  body: any;
+  params: any;
+  query: any;
+  headers: any;
 }
 
 export async function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {

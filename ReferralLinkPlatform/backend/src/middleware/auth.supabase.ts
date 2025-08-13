@@ -4,6 +4,10 @@ import { supabaseAdmin } from '../config/supabase';
 export interface AuthRequest extends Request {
   user?: any;
   userId?: string;
+  body: any;
+  params: any;
+  query: any;
+  headers: any;
 }
 
 /**
