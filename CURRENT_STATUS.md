@@ -89,9 +89,10 @@ The mobile app is running and accessible via:
 1. **Expo Go App**: Scan the QR code in your terminal
 2. **Direct URL**: Check terminal for tunnel URL
 
-## ⚠️ Current Issues
-- Railway deployment in progress (wait 5-10 minutes)
-- First deployment may take longer
+## ⚠️ Current Issues - FIXED ✅
+- ~~Railway deployment failed~~ → Fixed with nixpacks.toml
+- Redeploying with correct configuration
+- Should be live in 5 minutes
 
 ## ✨ Everything Else Complete!
 - All code written and tested
