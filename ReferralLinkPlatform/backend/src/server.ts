@@ -17,6 +17,7 @@ import analyticsRouter from './routes/analytics.routes';
 import aiRouter from './routes/ai.routes';
 import communicationRouter from './routes/communication.routes';
 import adminRouter from './routes/admin.routes';
+import sharingRouter from './routes/sharing.routes';
 
 // Load environment variables
 dotenv.config();
@@ -109,6 +110,7 @@ class Server {
     this.app.use('/api/analytics', analyticsRouter);
     this.app.use('/api/ai', aiRouter);
     this.app.use('/api/communication', communicationRouter);
+    this.app.use('/api/sharing', sharingRouter);
     this.app.use('/api/admin', adminRouter);
     
     // Referral link redirect handler (for /r/:shortCode)

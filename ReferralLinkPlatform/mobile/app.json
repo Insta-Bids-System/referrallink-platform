@@ -17,7 +17,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "ai.instabids.referral",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSContactsUsageDescription": "This app needs access to your contacts to share referral links with friends."
+      }
     },
     "android": {
       "package": "ai.instabids.referral",
@@ -25,7 +28,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2196F3"
-      }
+      },
+      "permissions": [
+        "android.permission.READ_CONTACTS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

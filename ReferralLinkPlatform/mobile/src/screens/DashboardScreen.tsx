@@ -179,19 +179,11 @@ export const DashboardScreen = ({ navigation }: any) => {
               </Button>
               <Button
                 mode="contained"
-                icon="send"
-                onPress={() => navigation.navigate('SendReferral')}
+                icon="share-variant"
+                onPress={() => navigation.navigate('BulkShare')}
                 style={styles.actionButton}
               >
-                Send Referral
-              </Button>
-              <Button
-                mode="contained"
-                icon="contacts"
-                onPress={() => navigation.navigate('Contacts')}
-                style={styles.actionButton}
-              >
-                Import Contacts
+                Share with Contacts
               </Button>
               <Button
                 mode="contained"

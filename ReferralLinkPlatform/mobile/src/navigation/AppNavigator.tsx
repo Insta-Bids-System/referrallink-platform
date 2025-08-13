@@ -9,6 +9,7 @@ import { CreateLinkScreen } from '../screens/CreateLinkScreen';
 import { LinkDetailsScreen } from '../screens/LinkDetailsScreen';
 import { AnalyticsScreen } from '../screens/AnalyticsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { BulkShareScreen } from '../screens/BulkShareScreen';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const Stack = createStackNavigator();
@@ -72,6 +73,11 @@ const MainStack = () => (
       name="MyLinks" 
       component={LinksScreen}
       options={{ title: 'My Links' }}
+    />
+    <Stack.Screen 
+      name="BulkShare" 
+      component={BulkShareScreen}
+      options={{ title: 'Share with Contacts' }}
     />
   </Stack.Navigator>
 );

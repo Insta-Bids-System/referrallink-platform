@@ -82,5 +82,21 @@ export const referralApi = {
       console.error('Error fetching link details:', error.response?.data || error.message);
       throw error;
     }
+  },
+  
+  shareLink: async (data: {
+    linkId: string;
+    method: 'sms' | 'email' | 'whatsapp';
+    recipient: string;
+    message: string;
+    contactName?: string;
+  }) => {
+    try {
+      const response = await apiClient.post('/api/sharing/share', data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error sharing link:', error.response?.data || error.message);
+      throw error;
+    }
   }
 };
