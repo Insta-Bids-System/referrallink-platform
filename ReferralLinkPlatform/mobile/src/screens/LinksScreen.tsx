@@ -18,6 +18,8 @@ import {
   Badge,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { referralApi } from '../services/referral.api';
 
@@ -34,14 +36,14 @@ interface ReferralLink {
 }
 
 export const LinksScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'expired'>('all');
 
   const { data: links, refetch } = useQuery<ReferralLink[]>({
     queryKey: ['userLinks', filter],
-    queryFn: () => referralApi.getUserLinks({ filter }),
+    queryFn: () => referralApi.getUserLinks(),
   });
 
   const filteredLinks = links?.filter(link => {
@@ -60,7 +62,7 @@ export const LinksScreen = () => {
 
   const renderLink = ({ item }: { item: ReferralLink }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate('LinkDetails' as any, { linkId: item.id })}
+      onPress={() => navigation.navigate('LinkDetails', { linkId: item.id })}
     >
       <Card style={styles.linkCard}>
         <Card.Content>
@@ -164,7 +166,7 @@ export const LinksScreen = () => {
       <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() => navigation.navigate('CreateLink' as any)}
+        onPress={() => navigation.navigate('CreateLink')}
       />
     </View>
   );

@@ -27,7 +27,7 @@ interface Contact {
   name: string;
   phoneNumbers?: Array<{ number?: string; label?: string }>;
   emails?: Array<{ email?: string; label?: string }>;
-  image?: { uri: string };
+  image?: { uri?: string };
 }
 
 interface ContactSelectorProps {
@@ -197,7 +197,7 @@ export const ContactSelector: React.FC<ContactSelectorProps> = ({
               status={selectedContacts.has(item.id) ? 'checked' : 'unchecked'}
               onPress={() => toggleContactSelection(item.id)}
             />
-            {item.image ? (
+            {item.image?.uri ? (
               <Avatar.Image size={40} source={{ uri: item.image.uri }} />
             ) : (
               <Avatar.Text size={40} label={getContactInitials(item.name)} />

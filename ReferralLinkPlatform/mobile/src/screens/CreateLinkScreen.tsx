@@ -18,11 +18,13 @@ import {
   IconButton,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 import { referralApi } from '../services/referral.api';
 import { useAuthStore } from '../stores/authStore';
 
 export const CreateLinkScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,7 +48,7 @@ export const CreateLinkScreen = () => {
         // URL and expiration are now handled by the backend
       });
       
-      navigation.navigate('LinkDetails' as any, { 
+      navigation.navigate('LinkDetails', { 
         linkId: response.id,
         newLink: true 
       });
