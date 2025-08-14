@@ -54,9 +54,15 @@ export const LinkDetailsScreen = ({ route, navigation }: any) => {
 
   const shareLink = async () => {
     try {
+      // Only use message property to avoid duplicate URLs on some platforms
+      // The custom message from the link can be used if available
+      const shareMessage = link?.customMessage 
+        ? `${link.customMessage}\n\n${shortUrl}`
+        : `Check out this amazing opportunity at InstaBids!\n\n${shortUrl}`;
+      
       await Share.share({
-        message: `Check out this amazing opportunity at InstaBids!\n\n${shortUrl}`,
-        url: shortUrl,
+        message: shareMessage,
+        // Note: Don't use url property as it causes duplication on some platforms
       });
     } catch (error) {
       console.error(error);
