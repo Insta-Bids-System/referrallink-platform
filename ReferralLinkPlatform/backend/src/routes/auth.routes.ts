@@ -228,4 +228,36 @@ router.get('/me', (_req: Request, res: Response) => {
   });
 });
 
+// Check if test user exists (for debugging)
+router.get('/check-test-user', async (_req: Request, res: Response) => {
+  try {
+    const { data: user, error } = await supabaseAdmin
+      .from('users')
+      .select('id, email, first_name, last_name')
+      .eq('id', TEST_USER_ID)
+      .single();
+    
+    if (error || !user) {
+      return res.json({ 
+        exists: false, 
+        message: 'Test user does not exist',
+        userId: TEST_USER_ID 
+      });
+    }
+    
+    res.json({ 
+      exists: true, 
+      message: 'Test user exists',
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to check user' });
+  }
+});
+
 export default router;
