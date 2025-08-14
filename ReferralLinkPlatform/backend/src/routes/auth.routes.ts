@@ -27,12 +27,15 @@ router.post('/register', async (req: Request, res: Response): Promise<Response> 
     // Generate a random UUID for the user
     const userId = '550e8400-e29b-41d4-a716-' + Math.random().toString(36).substring(2, 14);
     
-    // Create JWT token
+    // Create JWT token with consistent secret
+    const jwtSecret = process.env.JWT_SECRET || 'default-secret';
+    console.log('Signing token with secret:', jwtSecret.substring(0, 10) + '...');
     const token = jwt.sign(
       { userId, email },
-      process.env.JWT_SECRET || 'default-secret',
+      jwtSecret,
       { expiresIn: '7d' }
     );
+    console.log('Token created for user:', userId);
     
     return res.status(201).json({
       message: 'User registered successfully',
@@ -66,12 +69,15 @@ router.post('/login', async (req: Request, res: Response): Promise<Response> => 
     
     // Mock authentication
     if (email === mockUser.email && password === mockUser.password) {
-      // Create JWT token
+      // Create JWT token with consistent secret
+      const jwtSecret = process.env.JWT_SECRET || 'default-secret';
+      console.log('Login - Signing token with secret:', jwtSecret.substring(0, 10) + '...');
       const token = jwt.sign(
         { userId: mockUser.id, email: mockUser.email },
-        process.env.JWT_SECRET || 'default-secret',
+        jwtSecret,
         { expiresIn: '7d' }
       );
+      console.log('Login token created for user:', mockUser.id);
       
       return res.json({
         message: 'Login successful',

@@ -51,10 +51,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email: string, password: string) => {
     try {
+      console.log('Attempting login for:', email);
       const response = await authClient.post('/api/auth/login', {
         email,
         password
       });
+      
+      console.log('Login response received:', response.data);
       
       // Handle both 'accessToken' and 'token' field names for compatibility
       const token = response.data.accessToken || response.data.token;
@@ -64,26 +67,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         throw new Error('No token received from server');
       }
       
+      console.log('Storing token in AsyncStorage:', token.substring(0, 20) + '...');
       await AsyncStorage.setItem('accessToken', token);
+      
+      // Verify it was stored
+      const storedToken = await AsyncStorage.getItem('accessToken');
+      console.log('Token verification - stored successfully:', storedToken === token);
+      
       set({ user, token, isAuthenticated: true });
+      console.log('Auth state updated successfully');
     } catch (error: any) {
       console.error('Login error:', error.response?.data || error.message);
-      // Fallback to mock user for testing
-      const mockUser = {
-        id: '1',
-        email,
-        firstName: 'Test',
-        lastName: 'User'
-      };
-      const mockToken = 'mock-jwt-token';
       
-      await AsyncStorage.setItem('accessToken', mockToken);
-      set({ user: mockUser, token: mockToken, isAuthenticated: true });
+      // Don't use mock fallback - throw the error instead
+      throw error;
     }
   },
 
   register: async (email: string, password: string, firstName: string, lastName: string) => {
     try {
+      console.log('Attempting registration for:', email);
       const response = await authClient.post('/api/auth/register', {
         email,
         password,
@@ -91,6 +94,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         lastName
       });
       
+      console.log('Registration response received:', response.data);
+      
       // Handle both 'accessToken' and 'token' field names for compatibility
       const token = response.data.accessToken || response.data.token;
       const { user } = response.data;
@@ -99,8 +104,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         throw new Error('No token received from server');
       }
       
+      console.log('Storing token in AsyncStorage:', token.substring(0, 20) + '...');
       await AsyncStorage.setItem('accessToken', token);
+      
+      // Verify it was stored
+      const storedToken = await AsyncStorage.getItem('accessToken');
+      console.log('Token verification - stored successfully:', storedToken === token);
+      
       set({ user, token, isAuthenticated: true });
+      console.log('Auth state updated successfully');
     } catch (error: any) {
       console.error('Register error:', error.response?.data || error.message);
       throw error;
@@ -115,17 +127,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initializeAuth: async () => {
     try {
       const token = await AsyncStorage.getItem('accessToken');
+      console.log('Initialize auth - checking for stored token:', token ? 'Found' : 'Not found');
+      
       if (token) {
-        // For now, use mock user data when token exists
+        // For now, just set the token and mark as authenticated
         // In production, you'd validate the token with the backend
-        const mockUser = {
-          id: '1',
-          email: 'test@example.com',
-          firstName: 'Test',
-          lastName: 'User'
-        };
-        set({ user: mockUser, token, isAuthenticated: true, isLoading: false });
+        console.log('Found stored token, marking as authenticated');
+        set({ 
+          token, 
+          isAuthenticated: true, 
+          isLoading: false,
+          // We don't have user data, but that's okay for now
+          user: null
+        });
       } else {
+        console.log('No stored token, user needs to login');
         set({ isLoading: false });
       }
     } catch (error) {

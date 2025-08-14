@@ -15,11 +15,19 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
+    console.log('Auth header:', authHeader ? 'Present' : 'Missing');
+    console.log('Token extracted:', token ? `${token.substring(0, 20)}...` : 'None');
+
     if (!token) {
       return res.status(401).json({ error: 'Access token required' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    // Use the same secret that was used to sign the token
+    const jwtSecret = process.env.JWT_SECRET || 'default-secret';
+    console.log('Using JWT secret:', jwtSecret.substring(0, 10) + '...');
+    
+    const decoded = jwt.verify(token, jwtSecret) as any;
+    console.log('Token decoded successfully, userId:', decoded.userId);
     
     // For now, skip database lookup and use decoded token data
     // In production, you'd want to verify the user exists in the database
@@ -33,8 +41,10 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
     req.user = user;
     next();
   } catch (error) {
+    console.error('Auth error:', error);
     if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({ error: 'Invalid token' });
+      console.error('JWT Error details:', error.message);
+      return res.status(401).json({ error: 'Invalid token', details: error.message });
     }
     if (error instanceof jwt.TokenExpiredError) {
       return res.status(401).json({ error: 'Token expired' });

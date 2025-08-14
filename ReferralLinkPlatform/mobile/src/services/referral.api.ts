@@ -13,11 +13,24 @@ const apiClient = axios.create({
 
 // Add auth token to requests
 apiClient.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    console.log('Retrieved token from storage:', token ? `${token.substring(0, 20)}...` : 'None');
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log('Added Authorization header to request');
+    } else {
+      console.log('No token found in AsyncStorage');
+    }
+  } catch (error) {
+    console.error('Error retrieving token:', error);
   }
+  
   return config;
+}, (error) => {
+  console.error('Request interceptor error:', error);
+  return Promise.reject(error);
 });
 
 export const referralApi = {
@@ -58,18 +71,32 @@ export const referralApi = {
   
   createLink: async (data: any) => {
     try {
-      // The backend expects these fields for a referral link
+      // The backend expects only customMessage and tags now
+      // URL is hard-coded to instabids.ai and expiry is auto-set to 10 days
       const requestData = {
-        originalUrl: data.originalUrl || 'https://instabids.ai',
         customMessage: data.customMessage || '',
-        metadata: data.metadata || {},
-        expiresAt: data.expiresAt || null
+        tags: data.tags || []
       };
       
+      console.log('Creating referral link with data:', requestData);
+      
       const response = await apiClient.post('/api/referrals', requestData);
+      
+      // Extract the link data from the response
+      if (response.data.link) {
+        return response.data.link;
+      }
+      
       return response.data;
     } catch (error: any) {
       console.error('Error creating link:', error.response?.data || error.message);
+      
+      // Provide more detailed error information
+      if (error.response) {
+        console.error('Error status:', error.response.status);
+        console.error('Error data:', error.response.data);
+      }
+      
       throw error;
     }
   },

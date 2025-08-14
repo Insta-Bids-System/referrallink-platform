@@ -15,6 +15,7 @@ import {
   HelperText,
 } from 'react-native-paper';
 import { useAuthStore } from '../stores/authStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState('test@example.com');
@@ -35,10 +36,22 @@ export const LoginScreen = () => {
     
     try {
       await login(email, password);
-    } catch (err) {
-      setError('Invalid credentials');
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      setError(err.response?.data?.error || 'Invalid credentials');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Debug function to clear stored token
+  const clearStoredToken = async () => {
+    try {
+      await AsyncStorage.removeItem('accessToken');
+      console.log('Token cleared from AsyncStorage');
+      setError('Token cleared - please login again');
+    } catch (error) {
+      console.error('Error clearing token:', error);
     }
   };
 
@@ -92,6 +105,15 @@ export const LoginScreen = () => {
               style={styles.textButton}
             >
               Forgot Password?
+            </Button>
+            
+            {/* Debug button to clear token */}
+            <Button 
+              mode="text" 
+              onPress={clearStoredToken}
+              style={styles.textButton}
+            >
+              Clear Token (Debug)
             </Button>
           </Card.Content>
         </Card>

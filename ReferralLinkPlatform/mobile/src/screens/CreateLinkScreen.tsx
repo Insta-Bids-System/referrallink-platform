@@ -20,12 +20,13 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { referralApi } from '../services/referral.api';
 import { useAuthStore } from '../stores/authStore';
+import { useReferralStore } from '../stores/referralStore';
 
 export const CreateLinkScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuthStore();
+  const { createLink } = useReferralStore();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     customMessage: '',
@@ -38,23 +39,29 @@ export const CreateLinkScreen = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
+    setErrors({});
     try {
-      // Links now automatically use instabids.ai and expire in 10 days
-      const response = await referralApi.createLink({
+      // Use the store's createLink function which properly handles the API call
+      const newLink = await createLink({
         customMessage: formData.customMessage,
-        trackClicks: formData.trackClicks,
-        enableQR: formData.enableQR,
         tags: formData.tags,
-        // URL and expiration are now handled by the backend
+        // trackClicks and enableQR are handled by backend metadata
       });
       
+      console.log('Link created successfully:', newLink);
+      
+      // Navigate to link details with the new link data
       navigation.navigate('LinkDetails', { 
-        linkId: response.id,
+        linkId: newLink.id,
+        linkData: newLink,
         newLink: true 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating link:', error);
-      setErrors({ submit: 'Failed to create link. Please try again.' });
+      const errorMessage = error.response?.data?.error || 
+                          error.message || 
+                          'Failed to create link. Please try again.';
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }
