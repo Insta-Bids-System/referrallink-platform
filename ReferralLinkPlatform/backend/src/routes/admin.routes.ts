@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import adminController from '../controllers/admin.controller';
+import AdminAnalyticsController from '../controllers/admin.analytics.controller';
 import { authenticateToken, authorizeRoles } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validation.middleware';
 import { body, param, query } from 'express-validator';
@@ -7,8 +8,15 @@ import { UserRole } from '../models/User.sequelize';
 
 const router = Router();
 
-// All admin routes require authentication and admin role
+// All admin routes require authentication
 router.use(authenticateToken);
+
+// Analytics routes (accessible by all authenticated users for their own data)
+router.get('/analytics/platform', AdminAnalyticsController.getPlatformAnalytics);
+router.get('/analytics/user/:userId', AdminAnalyticsController.getUserAnalytics);
+router.get('/analytics/clicks', AdminAnalyticsController.getAllClicks);
+
+// Require admin role for management routes
 router.use(authorizeRoles(UserRole.ADMIN, UserRole.SUPER_ADMIN));
 
 // User Management Routes

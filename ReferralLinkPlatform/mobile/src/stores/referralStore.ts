@@ -69,9 +69,11 @@ export const useReferralStore = create<ReferralStore>()(
         try {
           const newLink = await referralApi.createLink(data);
           
-          // Add the full URL if not present
-          if (!newLink.shortUrl && newLink.shortCode) {
-            newLink.shortUrl = `https://referrallink-platform-production.up.railway.app/r/${newLink.shortCode}`;
+          // The backend now returns the correct URL format
+          // url: "https://instabids.ai?ref=ABC123"
+          // No need to manually construct it
+          if (!newLink.shortUrl && newLink.url) {
+            newLink.shortUrl = newLink.url;
           }
           
           // Update the links array (replace existing since one-link-per-user)

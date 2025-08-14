@@ -53,17 +53,23 @@ export class SupabaseReferralController {
         metadata
       );
 
+      // Build the actual referral URL that users will share
+      const companyUrl = process.env.COMPANY_URL || 'https://instabids.ai';
+      const referralUrl = `${companyUrl}?ref=${link.short_code}`;
+      
       res.status(201).json({
         message: 'Referral link created successfully',
         link: {
           id: link.id,
           shortCode: link.short_code,
-          url: `${process.env.BASE_URL}/r/${link.short_code}`,
-          destinationUrl: process.env.COMPANY_URL || 'https://instabids.ai',
+          url: referralUrl, // This is what users will share: instabids.ai?ref=ABC123
+          trackingUrl: `${process.env.BASE_URL}/r/${link.short_code}`, // Backend tracking URL
+          destinationUrl: companyUrl,
           customMessage: link.custom_message,
           qrCode: link.qr_code,
           expiresAt: link.expires_at,
-          createdAt: link.created_at
+          createdAt: link.created_at,
+          statistics: link.statistics || { totalClicks: 0, uniqueClicks: 0, conversions: 0 }
         }
       });
     } catch (error: any) {
@@ -85,18 +91,21 @@ export class SupabaseReferralController {
 
       const links = await SupabaseReferralLinkService.getUserLinks(userId);
 
+      const companyUrl = process.env.COMPANY_URL || 'https://instabids.ai';
+      
       res.json({
         links: links.map(link => ({
           id: link.id,
           shortCode: link.short_code,
-          url: `${process.env.BASE_URL}/r/${link.short_code}`,
-          destinationUrl: process.env.COMPANY_URL || 'https://instabids.ai',
+          url: `${companyUrl}?ref=${link.short_code}`, // User-facing URL
+          trackingUrl: `${process.env.BASE_URL}/r/${link.short_code}`, // Backend tracking
+          destinationUrl: companyUrl,
           customMessage: link.custom_message,
           qrCode: link.qr_code,
           expiresAt: link.expires_at,
           isActive: link.is_active,
           isPrimary: link.is_primary,
-          statistics: link.statistics,
+          statistics: link.statistics || { totalClicks: 0, uniqueClicks: 0, conversions: 0 },
           createdAt: link.created_at
         }))
       });

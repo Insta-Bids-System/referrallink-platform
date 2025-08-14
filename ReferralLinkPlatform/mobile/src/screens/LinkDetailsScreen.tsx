@@ -41,9 +41,8 @@ export const LinkDetailsScreen = ({ route, navigation }: any) => {
     }
   };
 
-  // Build the full URL if not present
-  const shortUrl = link?.url || link?.shortUrl || 
-    (link?.shortCode ? `https://referrallink-platform-production.up.railway.app/r/${link.shortCode}` : '');
+  // Use the URL from the backend (already formatted as instabids.ai?ref=ABC123)
+  const shortUrl = link?.url || link?.shortUrl || '';
 
   const copyToClipboard = async () => {
     if (shortUrl) {
