@@ -59,7 +59,6 @@ export class SupabaseReferralLinkService {
       if (error) throw error;
 
       // Generate QR code with the actual destination URL
-      const companyUrl = process.env.COMPANY_URL || 'https://instabids.ai';
       const qrCodeUrl = `${companyUrl}?ref=${link.short_code}`;
       const qrCode = await QRCode.toDataURL(qrCodeUrl);
 
