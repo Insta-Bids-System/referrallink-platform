@@ -46,10 +46,12 @@ export const LinksScreen = () => {
     queryFn: () => referralApi.getUserLinks(),
   });
 
-  const filteredLinks = links?.filter(link => {
+  const filteredLinks = (links || []).filter(link => {
     if (searchQuery) {
-      return link.shortCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             link.originalUrl.toLowerCase().includes(searchQuery.toLowerCase());
+      const searchLower = searchQuery.toLowerCase();
+      return link.shortCode?.toLowerCase().includes(searchLower) ||
+             link.originalUrl?.toLowerCase().includes(searchLower) ||
+             link.destinationUrl?.toLowerCase().includes(searchLower);
     }
     return true;
   });
