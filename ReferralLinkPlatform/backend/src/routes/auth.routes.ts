@@ -1,16 +1,63 @@
 import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { supabaseAdmin } from '../config/supabase';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const router = Router();
 
+// Fixed UUID for test user - this will be consistent across sessions
+const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000';
+
 // Mock user data for testing
 const mockUser = {
-  id: '550e8400-e29b-41d4-a716-446655440000', // Use a valid UUID
+  id: TEST_USER_ID,
   email: 'test@example.com',
   firstName: 'Test',
   lastName: 'User',
   password: 'password123' // In production, this would be hashed
 };
+
+// Helper function to ensure test user exists in Supabase
+async function ensureTestUserExists() {
+  try {
+    // Check if user exists
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('id', TEST_USER_ID)
+      .single();
+    
+    if (!existingUser) {
+      console.log('Creating test user in Supabase...');
+      const passwordHash = await bcrypt.hash(mockUser.password, 10);
+      
+      // Create the test user
+      const { error } = await supabaseAdmin
+        .from('users')
+        .insert({
+          id: TEST_USER_ID,
+          email: mockUser.email,
+          password_hash: passwordHash,
+          first_name: mockUser.firstName,
+          last_name: mockUser.lastName,
+          is_active: true,
+          is_verified: true,
+          role: 'user'
+        });
+      
+      if (error) {
+        console.error('Error creating test user:', error);
+      } else {
+        console.log('Test user created successfully');
+      }
+    } else {
+      console.log('Test user already exists');
+    }
+  } catch (error) {
+    console.error('Error ensuring test user exists:', error);
+  }
+}
 
 // Register endpoint
 router.post('/register', async (req: Request, res: Response): Promise<Response> => {
@@ -24,8 +71,34 @@ router.post('/register', async (req: Request, res: Response): Promise<Response> 
       });
     }
     
-    // Generate a random UUID for the user
-    const userId = '550e8400-e29b-41d4-a716-' + Math.random().toString(36).substring(2, 14);
+    // Generate a proper UUID v4 for the user
+    const userId = crypto.randomUUID();
+    
+    // Create user in Supabase
+    try {
+      const passwordHash = await bcrypt.hash(password, 10);
+      const { error } = await supabaseAdmin
+        .from('users')
+        .insert({
+          id: userId,
+          email,
+          password_hash: passwordHash,
+          first_name: firstName,
+          last_name: lastName,
+          is_active: true,
+          is_verified: false,
+          role: 'user'
+        });
+      
+      if (error) {
+        console.error('Error creating user in Supabase:', error);
+        if (error.code === '23505') { // Duplicate entry
+          return res.status(409).json({ error: 'User already exists' });
+        }
+      }
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+    }
     
     // Create JWT token with consistent secret
     const jwtSecret = process.env.JWT_SECRET || 'default-secret';
@@ -69,6 +142,9 @@ router.post('/login', async (req: Request, res: Response): Promise<Response> => 
     
     // Mock authentication
     if (email === mockUser.email && password === mockUser.password) {
+      // Ensure test user exists in Supabase
+      await ensureTestUserExists();
+      
       // Create JWT token with consistent secret
       const jwtSecret = process.env.JWT_SECRET || 'default-secret';
       console.log('Login - Signing token with secret:', jwtSecret.substring(0, 10) + '...');
