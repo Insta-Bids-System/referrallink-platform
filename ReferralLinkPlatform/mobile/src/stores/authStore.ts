@@ -130,9 +130,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.log('Initialize auth - checking for stored token:', token ? 'Found' : 'Not found');
       
       if (token) {
+        // Clear mock tokens or invalid tokens
+        if (token === 'mock-jwt-token' || !token.includes('.')) {
+          console.log('Found invalid/mock token, clearing it');
+          await AsyncStorage.removeItem('accessToken');
+          set({ 
+            token: null, 
+            isAuthenticated: false, 
+            isLoading: false,
+            user: null
+          });
+          return;
+        }
+        
         // For now, just set the token and mark as authenticated
         // In production, you'd validate the token with the backend
-        console.log('Found stored token, marking as authenticated');
+        console.log('Found valid token, marking as authenticated');
         set({ 
           token, 
           isAuthenticated: true, 

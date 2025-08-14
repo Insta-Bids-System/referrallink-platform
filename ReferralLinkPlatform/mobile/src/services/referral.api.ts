@@ -18,6 +18,13 @@ apiClient.interceptors.request.use(async (config) => {
     console.log('Retrieved token from storage:', token ? `${token.substring(0, 20)}...` : 'None');
     
     if (token) {
+      // Don't send mock tokens
+      if (token === 'mock-jwt-token' || !token.includes('.')) {
+        console.log('Detected invalid/mock token, removing it');
+        await AsyncStorage.removeItem('accessToken');
+        throw new Error('Invalid token detected - please login again');
+      }
+      
       config.headers.Authorization = `Bearer ${token}`;
       console.log('Added Authorization header to request');
     } else {
@@ -32,6 +39,19 @@ apiClient.interceptors.request.use(async (config) => {
   console.error('Request interceptor error:', error);
   return Promise.reject(error);
 });
+
+// Add response interceptor to handle 401 errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.log('Got 401 error, clearing token and redirecting to login');
+      await AsyncStorage.removeItem('accessToken');
+      // The app will automatically redirect to login when token is removed
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const referralApi = {
   getUserLinks: async (options?: { limit?: number }) => {
