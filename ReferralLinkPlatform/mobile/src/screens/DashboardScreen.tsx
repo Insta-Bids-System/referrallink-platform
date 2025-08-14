@@ -143,24 +143,37 @@ export const DashboardScreen = ({ navigation }: any) => {
                 View All
               </Button>
             </View>
-            {recentLinks?.map((link) => (
-              <TouchableOpacity
-                key={link.id}
-                onPress={() =>
-                  navigation.navigate('LinkDetails', { linkId: link.id })
-                }
-              >
-                <Surface style={styles.linkItem}>
-                  <View style={styles.linkInfo}>
-                    <Text style={styles.linkCode}>/{link.shortCode}</Text>
-                    <Text style={styles.linkStats}>
-                      {link.clicks} clicks • {link.conversions} conversions
-                    </Text>
-                  </View>
-                  <IconButton icon="chevron-right" size={20} />
-                </Surface>
-              </TouchableOpacity>
-            ))}
+            {Array.isArray(recentLinks) && recentLinks.length > 0 ? (
+              recentLinks.map((link) => (
+                <TouchableOpacity
+                  key={link.id}
+                  onPress={() =>
+                    navigation.navigate('LinkDetails', { linkId: link.id })
+                  }
+                >
+                  <Surface style={styles.linkItem}>
+                    <View style={styles.linkInfo}>
+                      <Text style={styles.linkCode}>/{link.shortCode}</Text>
+                      <Text style={styles.linkStats}>
+                        {link.clicks || 0} clicks • {link.conversions || 0} conversions
+                      </Text>
+                    </View>
+                    <IconButton icon="chevron-right" size={20} />
+                  </Surface>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>No links created yet</Text>
+                <Button
+                  mode="contained"
+                  onPress={() => navigation.navigate('CreateLink')}
+                  style={styles.emptyStateButton}
+                >
+                  Create Your First Link
+                </Button>
+              </View>
+            )}
           </Card.Content>
         </Card>
 
@@ -304,5 +317,18 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: '#6200ee',
+  },
+  emptyState: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptyStateButton: {
+    marginTop: 8,
   },
 });

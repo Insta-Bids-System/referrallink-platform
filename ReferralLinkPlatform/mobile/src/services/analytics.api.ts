@@ -24,19 +24,31 @@ export const analyticsApi = {
   getUserStats: async () => {
     try {
       const response = await apiClient.get('/api/analytics/user');
-      return response.data;
+      // Handle both wrapped and unwrapped responses
+      const data = response.data.data || response.data;
+      return {
+        totalSent: data.totalSent || 0,
+        totalClicks: data.totalClicks || 0,
+        conversions: data.conversions || 0,
+        conversionRate: data.conversionRate || 0,
+        chartData: data.chartData || {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          clicks: [0, 0, 0, 0, 0, 0, 0],
+          conversions: [0, 0, 0, 0, 0, 0, 0]
+        }
+      };
     } catch (error) {
       console.error('Error fetching user stats:', error);
-      // Return mock data as fallback
+      // Return empty data instead of mock data
       return {
-        totalSent: 42,
-        totalClicks: 156,
-        conversions: 23,
-        conversionRate: 14.7,
+        totalSent: 0,
+        totalClicks: 0,
+        conversions: 0,
+        conversionRate: 0,
         chartData: {
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          clicks: [20, 35, 28, 42, 15, 10, 6],
-          conversions: [3, 5, 4, 7, 2, 1, 1]
+          clicks: [0, 0, 0, 0, 0, 0, 0],
+          conversions: [0, 0, 0, 0, 0, 0, 0]
         }
       };
     }
