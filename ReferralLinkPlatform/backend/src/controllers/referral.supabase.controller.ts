@@ -23,13 +23,18 @@ export class SupabaseReferralController {
       
       if (existingLink && existingLink.is_active) {
         // Return existing link instead of creating a new one
+        const companyUrl = process.env.COMPANY_URL || 'https://instabids.ai';
+        const referralUrl = `${companyUrl}?ref=${existingLink.short_code}`;
+        
         res.json({
           message: 'You already have an active referral link',
           link: {
             id: existingLink.id,
             shortCode: existingLink.short_code,
-            url: `${process.env.BASE_URL}/r/${existingLink.short_code}`,
-            destinationUrl: process.env.COMPANY_URL || 'https://instabids.ai',
+            url: referralUrl, // instabids.ai?ref=ABC123
+            shortUrl: referralUrl, // For backward compatibility
+            trackingUrl: `${process.env.BASE_URL}/r/${existingLink.short_code}`,
+            destinationUrl: companyUrl,
             customMessage: existingLink.custom_message,
             qrCode: existingLink.qr_code,
             expiresAt: existingLink.expires_at,
@@ -63,6 +68,7 @@ export class SupabaseReferralController {
           id: link.id,
           shortCode: link.short_code,
           url: referralUrl, // This is what users will share: instabids.ai?ref=ABC123
+          shortUrl: referralUrl, // For backward compatibility
           trackingUrl: `${process.env.BASE_URL}/r/${link.short_code}`, // Backend tracking URL
           destinationUrl: companyUrl,
           customMessage: link.custom_message,
@@ -136,12 +142,14 @@ export class SupabaseReferralController {
         return;
       }
 
+      const companyUrl = process.env.COMPANY_URL || 'https://instabids.ai';
       res.json({
         link: {
           id: link.id,
           shortCode: link.short_code,
-          url: `${process.env.BASE_URL}/r/${link.short_code}`,
-          destinationUrl: process.env.COMPANY_URL || 'https://instabids.ai',
+          url: `${companyUrl}?ref=${link.short_code}`,
+          trackingUrl: `${process.env.BASE_URL}/r/${link.short_code}`,
+          destinationUrl: companyUrl,
           customMessage: link.custom_message,
           qrCode: link.qr_code,
           expiresAt: link.expires_at,
@@ -168,13 +176,15 @@ export class SupabaseReferralController {
 
       const link = await SupabaseReferralLinkService.refreshLink(userId);
 
+      const companyUrl = process.env.COMPANY_URL || 'https://instabids.ai';
       res.json({
         message: 'Link refreshed successfully',
         link: {
           id: link.id,
           shortCode: link.short_code,
-          url: `${process.env.BASE_URL}/r/${link.short_code}`,
-          destinationUrl: process.env.COMPANY_URL || 'https://instabids.ai',
+          url: `${companyUrl}?ref=${link.short_code}`,
+          trackingUrl: `${process.env.BASE_URL}/r/${link.short_code}`,
+          destinationUrl: companyUrl,
           customMessage: link.custom_message,
           qrCode: link.qr_code,
           expiresAt: link.expires_at,
