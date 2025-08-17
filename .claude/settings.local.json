@@ -79,7 +79,8 @@
       "Bash(start C:/Users/USER/Desktop/ReferralLink/RAILWAY_DEPLOYMENT_STATUS.md)",
       "Bash(railway service:*)",
       "Bash(start C:/Users/USER/Desktop/ReferralLink/DEPLOYMENT_SUCCESS.md)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "WebSearch"
     ],
     "deny": []
   }

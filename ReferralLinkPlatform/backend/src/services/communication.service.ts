@@ -34,35 +34,50 @@ export class CommunicationService {
   private emailFrom: string;
 
   constructor() {
-    // Initialize Twilio (skip if test credentials)
-    const accountSid = process.env.TWILIO_ACCOUNT_SID || 'ACtest';
-    const authToken = process.env.TWILIO_AUTH_TOKEN || 'test';
+    // Initialize Twilio with v4 best practices
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
     
-    if (accountSid.startsWith('AC') && accountSid.length > 5) {
+    if (accountSid && authToken && accountSid.startsWith('AC')) {
+      // Twilio v4 supports credential storage in environment variables
+      // If no credentials are provided when instantiating, it uses TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN
       this.twilioClient = twilio(accountSid, authToken);
+      console.log('Twilio client initialized successfully');
     } else {
-      // Mock client for testing
+      // Mock client for testing when no credentials
       this.twilioClient = {} as any;
+      console.log('Twilio running in mock mode - add credentials to enable SMS');
     }
     
     this.twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER || '';
     this.twilioWhatsAppNumber = process.env.WHATSAPP_PHONE_NUMBER || '';
 
-    // Initialize SendGrid (skip if test credentials)
-    this.sendGridApiKey = process.env.SENDGRID_API_KEY || 'SG.test';
-    this.emailFrom = process.env.EMAIL_FROM || 'noreply@referrallink.com';
+    // Initialize SendGrid with latest best practices
+    this.sendGridApiKey = process.env.SENDGRID_API_KEY || '';
+    this.emailFrom = process.env.EMAIL_FROM || 'noreply@instabids.ai';
     
-    if (this.sendGridApiKey.startsWith('SG.') && this.sendGridApiKey.length > 5) {
+    if (this.sendGridApiKey && this.sendGridApiKey.startsWith('SG.')) {
       sgMail.setApiKey(this.sendGridApiKey);
+      console.log('SendGrid client initialized successfully');
+    } else {
+      console.log('SendGrid running in mock mode - add API key to enable emails');
     }
   }
 
   async sendSMS(phoneNumber: string, message: string): Promise<MessageStatus> {
     try {
+      // Check if Twilio is properly configured
+      if (!this.twilioClient.messages) {
+        throw new Error('Twilio not configured. Please add TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN to environment variables.');
+      }
+
+      // Ensure phone number is in E.164 format
+      const formattedPhone = this.formatPhoneNumber(phoneNumber);
+
       const result = await this.twilioClient.messages.create({
         body: message,
         from: this.twilioPhoneNumber,
-        to: phoneNumber
+        to: formattedPhone
       });
 
       return {
@@ -73,10 +88,21 @@ export class CommunicationService {
       };
     } catch (error: any) {
       console.error('SMS send error:', error);
+      
+      // Better error messages for common issues
+      let errorMessage = error.message;
+      if (error.code === 21211) {
+        errorMessage = 'Invalid phone number format. Use E.164 format: +1234567890';
+      } else if (error.code === 21608) {
+        errorMessage = 'Phone number not verified. In trial mode, add number to verified list in Twilio console.';
+      } else if (error.code === 20003) {
+        errorMessage = 'Authentication failed. Check your Twilio credentials.';
+      }
+
       return {
         recipientId: phoneNumber,
         status: 'failed',
-        error: error.message
+        error: errorMessage
       };
     }
   }
@@ -88,12 +114,27 @@ export class CommunicationService {
     textContent?: string
   ): Promise<MessageStatus> {
     try {
+      // Check if SendGrid is properly configured
+      if (!this.sendGridApiKey || !this.sendGridApiKey.startsWith('SG.')) {
+        throw new Error('SendGrid not configured. Please add SENDGRID_API_KEY to environment variables.');
+      }
+
       const msg = {
         to: email,
         from: this.emailFrom,
         subject,
         text: textContent || this.stripHtml(htmlContent),
-        html: htmlContent
+        html: htmlContent,
+        // Add tracking settings
+        trackingSettings: {
+          clickTracking: {
+            enable: true,
+            enableText: true
+          },
+          openTracking: {
+            enable: true
+          }
+        }
       };
 
       const [response] = await sgMail.send(msg);
@@ -106,10 +147,21 @@ export class CommunicationService {
       };
     } catch (error: any) {
       console.error('Email send error:', error);
+      
+      // Better error messages for common SendGrid issues
+      let errorMessage = error.message;
+      if (error.code === 401) {
+        errorMessage = 'SendGrid authentication failed. Check your API key.';
+      } else if (error.code === 403) {
+        errorMessage = 'Sender email not verified. Verify ' + this.emailFrom + ' in SendGrid.';
+      } else if (error.response && error.response.body && error.response.body.errors) {
+        errorMessage = error.response.body.errors.map((e: any) => e.message).join(', ');
+      }
+
       return {
         recipientId: email,
         status: 'failed',
-        error: error.message
+        error: errorMessage
       };
     }
   }
@@ -367,6 +419,22 @@ export class CommunicationService {
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private formatPhoneNumber(phoneNumber: string): string {
+    // Remove all non-digit characters
+    let cleaned = phoneNumber.replace(/\D/g, '');
+    
+    // Add + if not present
+    if (!phoneNumber.startsWith('+')) {
+      // Assume US number if 10 digits
+      if (cleaned.length === 10) {
+        cleaned = '1' + cleaned;
+      }
+      return '+' + cleaned;
+    }
+    
+    return phoneNumber;
   }
 
   async validatePhoneNumber(phoneNumber: string): Promise<boolean> {
